@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplementary Material for ExPose, CVPR 2026</title>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/app.css">
+    
+    <style>
+        body {
+            margin: 0;
+            overflow-x: hidden;
+            background-color: #ffffff;
+        }
+        
+        .scene-section {
+            margin: 0;
+            background: rgb(240, 240, 240);
+            padding: 40px 0;
+        }
+        
+        .scene-section:nth-child(even) {
+            background: rgb(255, 255, 255);
+        }
+        
+        .images-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .image-box {
+            text-align: center;
+        }
+        
+        .image-box img {
+            max-width: 300px;
+            width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .image-box p {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .video-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .video-container video {
+            max-width: 640px;
+            width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .prompt-box {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin: 15px auto;
+            border-radius: 4px;
+            max-width: 900px;
+        }
+        
+        .pointcloud-container {
+            margin: 20px 0;
+        }
+        
+        .pointcloud-viewer {
+            width: 100%;
+            height: 500px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            background: #000;
+            position: relative;
+            cursor: grab;
+        }
+        
+        .pointcloud-viewer:active {
+            cursor: grabbing;
+        }
+        
+        .viewer-label {
+            text-align: center;
+            font-weight: bold;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(233, 236, 239, 0.8);
+            border-radius: 4px;
+        }
+        
+        .metrics {
+            background: rgba(255, 243, 205, 0.8);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .controls-hint {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            margin: 5px 0;
+        }
+        
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 1200px) {
+            .comparison-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            border-radius: 4px;
+            z-index: 10;
+        }
+        
+        /* Go to Top 버튼 스타일 */
+        #goTopBtn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            display: none;
+            width: 50px;
+            height: 50px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        #goTopBtn:hover {
+            background-color: #0056b3;
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        
+        #goTopBtn:active {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="header" style="text-align: center; margin: auto;">
+        <div class="row" id="title-row" style="max-width: 100%; margin: 0 auto; display: inline-block;">
+            <h2 class="col-md-12 text-center" id="title">
+                ExPose: Reinforcing Video Generation Models for Extreme Pose Estimation<br>
+            </h2>
+            <h3>Point Cloud Visualization</h3>
+        </div>
+        
+        <!-- Dataset Navigation -->
+        <div class="row" style="margin-top: 20px;">
+            <div class="col-md-12 text-center">
+                <div style="display: inline-block; border: 2px solid #007bff; padding: 15px; border-radius: 8px; background-color: #f0f8ff;">
+                    <ul class="nav nav-pills center-pills" style="margin-bottom: 0;">
+                        <li><a href="../../index.html">Generated Video Comparisons</a></li>
+                        <li class="active"><a href="website/html/pointcloud_visualization.html">Pose Visualization Results</a></li>
+                        <li><a href="dataset_pseudo.html">Pseudo Video Dataset for SFT</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dataset Quick Navigation -->
+        <div class="row" style="margin-top: 20px;">
+            <div class="col-md-12 text-center">
+                <div style="display: inline-block; border: 2px solid #ddd; padding: 20px; border-radius: 8px; background-color: #f9f9f9;">
+                    <h4 style="margin-top: 0; margin-bottom: 15px;">Jump to Dataset</h4>
+                    <div style="display: inline-block;">
+                        <ul class="nav nav-pills center-pills">
+                            <li><a href="#dl3dv-section">DL3DV</a></li>
+                            <li><a href="#navi-section">NAVI</a></li>
+                            <li><a href="#scannet-section">ScanNet</a></li>
+                            <li><a href="#cambridge-section">Cambridge Landmarks</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="main" style="width:100%">
+        <br><br>
+        
+        <!-- DL3DV Section -->
+        <div class="scene-section" id="dl3dv-section">
+            <div class="container">
+                <h2 class="text-center">DL3DV Dataset</h2>
+                <!-- Scenes will be dynamically generated here -->
+            </div>
+        </div>
+        
+        <!-- NAVI Section -->
+        <div class="scene-section" id="navi-section">
+            <div class="container">
+                <h2 class="text-center">NAVI</h2>
+                <!-- Scenes will be dynamically generated here -->
+            </div>
+        </div>
+
+        <!-- ScanNet Section -->
+        <div class="scene-section" id="scannet-section">
+            <div class="container">
+                <h2 class="text-center">ScanNet</h2>
+                <!-- Scenes will be dynamically generated here -->
+            </div>
+        </div>
+        
+        <!-- Cambridge Landmarks Section -->
+        <div class="scene-section" id="cambridge-section">
+            <div class="container">
+                <h2 class="text-center">Cambridge Landmarks</h2>
+                <!-- Scenes will be dynamically generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/PLYLoader.js"></script>
+    
+    <!-- Embedded JS files will be loaded dynamically by pointcloud_config.js -->
+    
+    <script src="../js/pointcloud_viewer.js"></script>
+    <script src="../js/pointcloud_config.js"></script>
+    
+    <!-- Go to Top 버튼 -->
+    <button id="goTopBtn" title="Go to top">↑</button>
+
+    <div class="row text-center" style="background-color:rgb(50, 50, 50); color:white; margin-top: 40px;">
+      <div class="col-md-8 col-md-offset-2">
+        <h3> ExPose: Reinforcing Video Generation Models for Extreme Pose Estimation </h3><br>
+      </div>
+    </div>
+    
+    <script>
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                console.log('DOM loaded, initializing viewers...');
+                await initializePointCloudViewers();
+                console.log('Viewers initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize viewers:', error);
+            }
+        });
+        
+        // Go to Top button functionality
+        const goTopBtn = document.getElementById('goTopBtn');
+        
+        window.onscroll = function() {
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                goTopBtn.style.display = 'block';
+            } else {
+                goTopBtn.style.display = 'none';
+            }
+        };
+        
+        goTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+  </div>
+</body>
+</html>
